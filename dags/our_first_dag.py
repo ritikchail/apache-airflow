@@ -8,7 +8,14 @@ def greet():
 
 def person(name, age):
     print(f"Hello, my name is {name} and I am {age} years old.")
-    
+
+def get_name():
+    return "Ritik"
+
+def get_name_xpull(ti):
+    name = ti.xcom_pull(task_ids='our_sixth_task')
+    print(f"The name pulled from XCom is: {name}")
+
 
 default_args = {
     'owner': 'airflow',
@@ -17,7 +24,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id='dag_five_tasksv1',
+    dag_id='dag_seven_tasks',
     description='Our first DAG',
     schedule='@daily',
     start_date=datetime(2026, 1, 1),
@@ -46,6 +53,16 @@ with DAG(
         python_callable=person,
         op_kwargs={'name': 'Ritik', 'age': 25}
     )
+    task6 = PythonOperator(
+        task_id='our_sixth_task',
+        python_callable=get_name
+    )
+    task7 = PythonOperator(
+        task_id='our_seventh_task',
+        python_callable=get_name_xpull
+    )
+
+
     task_1 >> [task2, task4]
     task2 >> task3
-    task4 >> task5
+    task4 >> task5 >> task6 >> task7
